@@ -5,6 +5,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { connectDB } from './config/db';
 import authRoutes from './routes/auth';
+import { authenticate } from './middleware/authenticate';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -19,6 +20,11 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+
+// Every route mounted below this line requires a valid access token.
+// The webhook route (Stage 5) has its own signature verification and
+// must be mounted above this line, alongside /api/auth.
+app.use(authenticate);
 
 const PORT = process.env.PORT || 4000;
 
