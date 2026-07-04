@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { connectDB } from './config/db';
+import { seedDatabase } from './seed';
 import authRoutes from './routes/auth';
 import productRoutes from './routes/products';
 import { authenticate } from './middleware/authenticate';
@@ -20,6 +21,8 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.use('/images', express.static(path.join(__dirname, '../public/images')));
+
 app.use('/api/auth', authRoutes);
 
 // Every route mounted below this line requires a valid access token.
@@ -32,6 +35,7 @@ app.use('/api/products', productRoutes);
 const PORT = process.env.PORT || 4000;
 
 connectDB()
+  .then(() => seedDatabase())
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Backend listening on port ${PORT}`);

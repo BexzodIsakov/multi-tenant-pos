@@ -19,7 +19,7 @@ demonstrate live (a cashier from one tenant should see zero products from the ot
 
 | Tenant | Role | Email | Password |
 |---|---|---|---|
-| Milano Pizza | admin | admin@milano.test | (pick something simple, document it here once set) |
+| Milano Pizza | admin | admin@milano.test | pass123 |
 | Milano Pizza | cashier | cashier@milano.test | " |
 | Sweet Corner | admin | admin@sweetcorner.test | " |
 | Sweet Corner | cashier | cashier@sweetcorner.test | " |
