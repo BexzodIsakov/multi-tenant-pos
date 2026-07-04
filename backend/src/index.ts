@@ -5,6 +5,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { connectDB } from './config/db';
 import authRoutes from './routes/auth';
+import productRoutes from './routes/products';
 import { authenticate } from './middleware/authenticate';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -25,6 +26,8 @@ app.use('/api/auth', authRoutes);
 // The webhook route (Stage 5) has its own signature verification and
 // must be mounted above this line, alongside /api/auth.
 app.use(authenticate);
+
+app.use('/api/products', productRoutes);
 
 const PORT = process.env.PORT || 4000;
 
