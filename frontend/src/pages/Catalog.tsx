@@ -37,6 +37,8 @@ export function Catalog() {
 
   const cartItems = useCartStore((state) => state.items);
   const addItem = useCartStore((state) => state.addItem);
+  const decrementItem = useCartStore((state) => state.decrementItem);
+  const updateQuantity = useCartStore((state) => state.updateQuantity);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -76,6 +78,11 @@ export function Catalog() {
 
   function cartQuantityFor(productId: string): number {
     return cartItems.find((item) => item.productId === productId)?.quantity ?? 0;
+  }
+
+  function handleSetQuantity(productId: string, stock: number, rawValue: number) {
+    if (Number.isNaN(rawValue)) return;
+    updateQuantity(productId, Math.max(1, Math.min(rawValue, stock)));
   }
 
   return (
@@ -123,7 +130,7 @@ export function Catalog() {
                     key={product._id}
                     product={product}
                     quantityInCart={cartQuantityFor(product._id)}
-                    onAdd={() =>
+                    onIncrement={() =>
                       addItem({
                         productId: product._id,
                         name: product.name,
@@ -131,6 +138,10 @@ export function Catalog() {
                         stock: product.stock,
                         imageUrl: product.imageUrl
                       })
+                    }
+                    onDecrement={() => decrementItem(product._id)}
+                    onSetQuantity={(quantity) =>
+                      handleSetQuantity(product._id, product.stock, quantity)
                     }
                   />
                 ))}

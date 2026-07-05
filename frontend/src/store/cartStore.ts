@@ -14,6 +14,7 @@ interface CartState {
   addItem: (product: Omit<CartItem, 'quantity'>) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  decrementItem: (productId: string) => void;
   clearCart: () => void;
 }
 
@@ -48,6 +49,22 @@ export const useCartStore = create<CartState>((set) => ({
         item.productId === productId ? { ...item, quantity } : item
       )
     })),
+
+  decrementItem: (productId) =>
+    set((state) => {
+      const existing = state.items.find((item) => item.productId === productId);
+      if (!existing) return state;
+
+      if (existing.quantity <= 1) {
+        return { items: state.items.filter((item) => item.productId !== productId) };
+      }
+
+      return {
+        items: state.items.map((item) =>
+          item.productId === productId ? { ...item, quantity: item.quantity - 1 } : item
+        )
+      };
+    }),
 
   clearCart: () => set({ items: [] })
 }));
