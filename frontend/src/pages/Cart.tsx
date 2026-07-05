@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch, ApiError } from '../api/client';
 import { API_BASE_URL } from '../api/config';
-import { useCartStore } from '../store/cartStore';
+import { useCartStore, CartItem } from '../store/cartStore';
 import { XIcon } from '../components/icons';
 import { QuantityStepper } from '../components/QuantityStepper';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -11,7 +11,7 @@ import type { CreateOrderResponse, InsufficientStockDetail } from '../types/orde
 export function Cart() {
   const navigate = useNavigate();
   const items = useCartStore((state) => state.items);
-  const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const setQuantity = useCartStore((state) => state.setQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clearCart);
 
@@ -24,15 +24,19 @@ export function Cart() {
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  function handleQuantityChange(productId: string, stock: number, value: number) {
+  function handleQuantityChange(item: CartItem, value: number) {
     if (Number.isNaN(value)) return;
-    const clamped = Math.max(1, Math.min(value, stock));
-    updateQuantity(productId, clamped);
+    // Floor of 1 here, on purpose: editing quantity in the cart never
+    // removes the line item, that only happens through the explicit
+    // remove button + confirmation dialog below.
+    const clamped = Math.max(1, Math.min(value, item.stock));
+    const { quantity: _quantity, ...productInfo } = item;
+    setQuantity(productInfo, clamped);
 
     setStockErrors((prev) => {
-      if (!(productId in prev)) return prev;
+      if (!(item.productId in prev)) return prev;
       const rest = { ...prev };
-      delete rest[productId];
+      delete rest[item.productId];
       return rest;
     });
   }
@@ -107,15 +111,7 @@ export function Cart() {
               <QuantityStepper
                 quantity={item.quantity}
                 max={item.stock}
-                onIncrement={() =>
-                  handleQuantityChange(item.productId, item.stock, item.quantity + 1)
-                }
-                onDecrement={() =>
-                  handleQuantityChange(item.productId, item.stock, item.quantity - 1)
-                }
-                onSetQuantity={(quantity) =>
-                  handleQuantityChange(item.productId, item.stock, quantity)
-                }
+                onChange={(quantity) => handleQuantityChange(item, quantity)}
                 itemName={item.name}
               />
 
@@ -149,7 +145,7 @@ export function Cart() {
         onClick={handleCheckout}
         className="w-full bg-amber-400 text-gray-900 font-semibold rounded-lg px-4 py-3 mt-4 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isCheckingOut ? 'Placing order...' : 'Checkout'}
+        {isCheckingOut ? 'Placing order...' : 'Order'}
       </button>
 
       {pendingRemoveItem && (

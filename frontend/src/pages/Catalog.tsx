@@ -36,9 +36,7 @@ export function Catalog() {
   const [error, setError] = useState<string | null>(null);
 
   const cartItems = useCartStore((state) => state.items);
-  const addItem = useCartStore((state) => state.addItem);
-  const decrementItem = useCartStore((state) => state.decrementItem);
-  const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const setQuantity = useCartStore((state) => state.setQuantity);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -80,9 +78,19 @@ export function Catalog() {
     return cartItems.find((item) => item.productId === productId)?.quantity ?? 0;
   }
 
-  function handleSetQuantity(productId: string, stock: number, rawValue: number) {
+  function handleChangeQuantity(product: Product, rawValue: number) {
     if (Number.isNaN(rawValue)) return;
-    updateQuantity(productId, Math.max(1, Math.min(rawValue, stock)));
+    const clamped = Math.max(0, Math.min(rawValue, product.stock));
+    setQuantity(
+      {
+        productId: product._id,
+        name: product.name,
+        price: product.price,
+        stock: product.stock,
+        imageUrl: product.imageUrl
+      },
+      clamped
+    );
   }
 
   return (
@@ -124,25 +132,13 @@ export function Catalog() {
               <h2 className="text-lg font-semibold text-gray-900 mb-3">
                 {category === 'Drink' ? 'Drinks' : category}
               </h2>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-4 gap-4">
                 {items.map((product) => (
                   <ProductCard
                     key={product._id}
                     product={product}
                     quantityInCart={cartQuantityFor(product._id)}
-                    onIncrement={() =>
-                      addItem({
-                        productId: product._id,
-                        name: product.name,
-                        price: product.price,
-                        stock: product.stock,
-                        imageUrl: product.imageUrl
-                      })
-                    }
-                    onDecrement={() => decrementItem(product._id)}
-                    onSetQuantity={(quantity) =>
-                      handleSetQuantity(product._id, product.stock, quantity)
-                    }
+                    onChangeQuantity={(quantity) => handleChangeQuantity(product, quantity)}
                   />
                 ))}
               </div>

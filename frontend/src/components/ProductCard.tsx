@@ -5,24 +5,16 @@ import { QuantityStepper } from './QuantityStepper';
 interface ProductCardProps {
   product: Product;
   quantityInCart: number;
-  onIncrement: () => void;
-  onDecrement: () => void;
-  onSetQuantity: (quantity: number) => void;
+  onChangeQuantity: (quantity: number) => void;
 }
 
-export function ProductCard({
-  product,
-  quantityInCart,
-  onIncrement,
-  onDecrement,
-  onSetQuantity
-}: ProductCardProps) {
+export function ProductCard({ product, quantityInCart, onChangeQuantity }: ProductCardProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col">
       <img
         src={`${API_BASE_URL}${product.imageUrl}`}
         alt={product.name}
-        className={`w-full aspect-square object-cover rounded-lg mb-3 ${product.stock === 0 ? 'grayscale' : ''}`}
+        className={`w-full aspect-[4/3] object-cover rounded-lg mb-3 ${product.stock === 0 ? 'grayscale' : ''}`}
       />
       <div className="text-base font-semibold text-gray-900">{product.name}</div>
       <div className={`text-sm mb-3 ${product.stock > 0 ? 'text-gray-500' : 'text-red-600 font-semibold'}`}>
@@ -30,25 +22,12 @@ export function ProductCard({
       </div>
       <div className="mt-auto flex items-center justify-between">
         <span className="font-semibold text-gray-900">${product.price.toFixed(2)}</span>
-        {quantityInCart === 0 ? (
-          <button
-            type="button"
-            disabled={product.stock === 0}
-            onClick={onIncrement}
-            className="bg-amber-400 text-gray-900 font-semibold rounded-lg px-3 py-1.5 text-sm hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Add
-          </button>
-        ) : (
-          <QuantityStepper
-            quantity={quantityInCart}
-            max={product.stock}
-            onIncrement={onIncrement}
-            onDecrement={onDecrement}
-            onSetQuantity={onSetQuantity}
-            itemName={product.name}
-          />
-        )}
+        <QuantityStepper
+          quantity={quantityInCart}
+          max={product.stock}
+          onChange={onChangeQuantity}
+          itemName={product.name}
+        />
       </div>
     </div>
   );

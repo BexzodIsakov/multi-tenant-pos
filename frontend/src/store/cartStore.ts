@@ -11,60 +11,41 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: Omit<CartItem, 'quantity'>) => void;
+  setQuantity: (product: Omit<CartItem, 'quantity'>, quantity: number) => void;
   removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  decrementItem: (productId: string) => void;
   clearCart: () => void;
 }
 
 export const useCartStore = create<CartState>((set) => ({
   items: [],
 
-  addItem: (product) =>
+  // A quantity of 0 or less removes the item entirely, this is the one
+  // place that decides "in cart" vs "not in cart", callers just pass the
+  // new quantity they want, whether that came from +/-, typing, or an
+  // initial add from 0.
+  setQuantity: (product, quantity) =>
     set((state) => {
+      if (quantity <= 0) {
+        return { items: state.items.filter((item) => item.productId !== product.productId) };
+      }
+
       const existing = state.items.find((item) => item.productId === product.productId);
 
       if (existing) {
         return {
           items: state.items.map((item) =>
-            item.productId === product.productId
-              ? { ...item, quantity: Math.min(item.quantity + 1, item.stock) }
-              : item
+            item.productId === product.productId ? { ...item, quantity } : item
           )
         };
       }
 
-      return { items: [...state.items, { ...product, quantity: 1 }] };
+      return { items: [...state.items, { ...product, quantity }] };
     }),
 
   removeItem: (productId) =>
     set((state) => ({
       items: state.items.filter((item) => item.productId !== productId)
     })),
-
-  updateQuantity: (productId, quantity) =>
-    set((state) => ({
-      items: state.items.map((item) =>
-        item.productId === productId ? { ...item, quantity } : item
-      )
-    })),
-
-  decrementItem: (productId) =>
-    set((state) => {
-      const existing = state.items.find((item) => item.productId === productId);
-      if (!existing) return state;
-
-      if (existing.quantity <= 1) {
-        return { items: state.items.filter((item) => item.productId !== productId) };
-      }
-
-      return {
-        items: state.items.map((item) =>
-          item.productId === productId ? { ...item, quantity: item.quantity - 1 } : item
-        )
-      };
-    }),
 
   clearCart: () => set({ items: [] })
 }));
