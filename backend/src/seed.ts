@@ -62,7 +62,7 @@ export async function seedDatabase(): Promise<void> {
       const [milano] = await Tenant.create([{ name: 'Milano Pizza' }], { session });
       const [sweetCorner] = await Tenant.create([{ name: 'Sweet Corner' }], { session });
 
-      await User.create(
+      await User.insertMany(
         [
           { tenantId: milano._id, role: 'admin', email: 'admin@milano.test', passwordHash },
           { tenantId: milano._id, role: 'cashier', email: 'cashier@milano.test', passwordHash },
