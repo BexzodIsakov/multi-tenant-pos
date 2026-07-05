@@ -13,8 +13,8 @@ export function AppShell() {
   const { role, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <aside className="w-60 bg-white flex flex-col p-4">
+    <div className="bg-gray-50 flex">
+      <aside className="w-60 h-screen sticky top-0 overflow-y-auto bg-white flex flex-col p-4">
         <div className="text-xl font-semibold text-gray-900 mb-8">Bito POS</div>
 
         <nav className="flex flex-col gap-1 flex-1">

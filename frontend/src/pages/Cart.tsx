@@ -98,7 +98,9 @@ export function Cart() {
                 <div className="font-semibold text-gray-900">{item.name}</div>
                 <div className="text-sm text-gray-500">${item.price.toFixed(2)} each</div>
                 {stockError !== undefined && (
-                  <div className="text-sm text-red-600 mt-1">Only {stockError} available</div>
+                  <div className="text-sm text-red-600 mt-1">
+                    {stockError === 0 ? 'Out of stock' : `Only ${stockError} available`}
+                  </div>
                 )}
               </div>
 

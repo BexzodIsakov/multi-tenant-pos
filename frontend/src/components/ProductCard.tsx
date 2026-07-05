@@ -22,10 +22,10 @@ export function ProductCard({
       <img
         src={`${API_BASE_URL}${product.imageUrl}`}
         alt={product.name}
-        className="w-full aspect-square object-cover rounded-lg mb-3"
+        className={`w-full aspect-square object-cover rounded-lg mb-3 ${product.stock === 0 ? 'grayscale' : ''}`}
       />
       <div className="text-base font-semibold text-gray-900">{product.name}</div>
-      <div className="text-sm text-gray-500 mb-3">
+      <div className={`text-sm mb-3 ${product.stock > 0 ? 'text-gray-500' : 'text-red-600 font-semibold'}`}>
         {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
       </div>
       <div className="mt-auto flex items-center justify-between">
