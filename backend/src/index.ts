@@ -7,6 +7,7 @@ import { connectDB } from './config/db';
 import { seedDatabase } from './seed';
 import authRoutes from './routes/auth';
 import productRoutes from './routes/products';
+import orderRoutes from './routes/orders';
 import { authenticate } from './middleware/authenticate';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -31,6 +32,7 @@ app.use('/api/auth', authRoutes);
 app.use(authenticate);
 
 app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
 
 const PORT = process.env.PORT || 4000;
 
