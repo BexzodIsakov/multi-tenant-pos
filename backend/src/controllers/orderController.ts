@@ -4,6 +4,7 @@ import { Product } from '../models/Product';
 import { Order, OrderDocument, OrderItem } from '../models/Order';
 import { OversellError } from '../utils/errors';
 import { runWithRetry } from '../utils/transactions';
+import { simulatePaymentProvider } from '../services/mockPaymentProvider';
 
 interface OrderItemInput {
   productId: string;
@@ -102,7 +103,7 @@ export async function createOrder(req: Request, res: Response) {
       items: safeItems
     });
 
-    // Stage 5 fires the mock payment provider here, after responding.
+    simulatePaymentProvider(order._id.toString(), tenantId);
   } catch (err) {
     if (err instanceof OversellError) {
       return res.status(409).json({

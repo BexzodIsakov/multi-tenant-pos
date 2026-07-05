@@ -8,6 +8,8 @@ import { seedDatabase } from './seed';
 import authRoutes from './routes/auth';
 import productRoutes from './routes/products';
 import orderRoutes from './routes/orders';
+import webhookRoutes from './routes/webhooks';
+import debugRoutes from './routes/debug';
 import { authenticate } from './middleware/authenticate';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -15,8 +17,15 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 const app = express();
 
 app.use(cors({ origin: process.env.FRONTEND_ORIGIN, credentials: true }));
-app.use(express.json());
 app.use(cookieParser());
+
+// Mounted before express.json(): the webhook route needs the raw request
+// body (as a Buffer) to verify the HMAC signature, and reads it via its
+// own express.raw() middleware. If the global JSON parser ran first, the
+// body would already be a parsed object by the time the handler saw it.
+app.use('/api/webhooks', webhookRoutes);
+
+app.use(express.json());
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
@@ -25,6 +34,10 @@ app.get('/health', (_req, res) => {
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
 app.use('/api/auth', authRoutes);
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api/debug', debugRoutes);
+}
 
 // Every route mounted below this line requires a valid access token.
 // The webhook route (Stage 5) has its own signature verification and
