@@ -10,7 +10,11 @@ interface ProductCardProps {
 
 export function ProductCard({ product, quantityInCart, onChangeQuantity }: ProductCardProps) {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col">
+    <div
+      className={`bg-white rounded-xl shadow-sm p-4 flex flex-col transition-shadow ${
+        quantityInCart > 0 ? 'ring-2 ring-amber-400' : ''
+      }`}
+    >
       <img
         src={`${API_BASE_URL}${product.imageUrl}`}
         alt={product.name}
