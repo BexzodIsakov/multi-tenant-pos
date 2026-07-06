@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Order } from '../models/Order';
 import { PaymentEvent } from '../models/PaymentEvent';
 import { verifySignature } from '../utils/signature';
+import { redisClient } from '../config/redis';
 
 interface WebhookPayload {
   eventId?: string;
@@ -52,6 +53,12 @@ export async function handlePaymentWebhook(req: Request, res: Response) {
   order.status = 'paid';
   order.paidAt = new Date();
   await order.save();
+
+  // Wipes every cached report range for this tenant rather than surgically
+  // invalidating just the affected date range, simple and correct given
+  // this task's time budget, see docs/07-reports.md.
+  const keys = await redisClient.keys(`report:${tenantId}:*`);
+  if (keys.length) await redisClient.del(keys);
 
   res.status(200).json({ status: 'ok' });
 }

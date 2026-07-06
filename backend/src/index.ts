@@ -4,10 +4,12 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { connectDB } from './config/db';
+import { connectRedis } from './config/redis';
 import { seedDatabase } from './seed';
 import authRoutes from './routes/auth';
 import productRoutes from './routes/products';
 import orderRoutes from './routes/orders';
+import reportRoutes from './routes/reports';
 import webhookRoutes from './routes/webhooks';
 import debugRoutes from './routes/debug';
 import { authenticate } from './middleware/authenticate';
@@ -46,10 +48,12 @@ app.use(authenticate);
 
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/reports', reportRoutes);
 
 const PORT = process.env.PORT || 4000;
 
 connectDB()
+  .then(() => connectRedis())
   .then(() => seedDatabase())
   .then(() => {
     app.listen(PORT, () => {
@@ -57,6 +61,6 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.error('Failed to connect to MongoDB', err);
+    console.error('Failed to start the server', err);
     process.exit(1);
   });
