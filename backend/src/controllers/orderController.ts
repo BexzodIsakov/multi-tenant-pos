@@ -5,6 +5,7 @@ import { Order, OrderDocument, OrderItem } from '../models/Order';
 import { OversellError } from '../utils/errors';
 import { runWithRetry } from '../utils/transactions';
 import { simulatePaymentProvider } from '../services/mockPaymentProvider';
+import { CASHIER_SAFE_PROJECTION } from '../services/projections';
 
 interface OrderItemInput {
   productId: string;
@@ -116,4 +117,22 @@ export async function createOrder(req: Request, res: Response) {
   } finally {
     await session.endSession();
   }
+}
+
+export async function getReceipt(req: Request, res: Response) {
+  const { tenantId, role } = req.auth!;
+  const { id } = req.params;
+
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(404).json({ error: 'order_not_found' });
+  }
+
+  const order = await Order.findOne(
+    { _id: id, tenantId },
+    role === 'cashier' ? CASHIER_SAFE_PROJECTION : {}
+  );
+
+  if (!order) return res.status(404).json({ error: 'order_not_found' });
+
+  res.json(order);
 }
